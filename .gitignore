@@ -2,4 +2,6 @@
 /public/build/
 public/index.html
 src/build
+package-lock.json
 .DS_Store
+package-lock.json

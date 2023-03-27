@@ -8,6 +8,21 @@ import { applyTheme } from './scripts/applyTheme';
 var apiSecret:string;
 var apiURL:string;
 
+var lastThemeData
+var lastTheme
+
+figma.on('selectionchange', () => {
+	if(lastThemeData && lastTheme) {
+		applyTheme(lastThemeData, lastTheme);
+	}
+})
+
+figma.on('documentchange', () => {
+	if(lastThemeData && lastTheme) {
+		applyTheme(lastThemeData, lastTheme);
+	}
+})
+
 //recieves msgs from the UI
 figma.ui.onmessage = msg => {
 
@@ -15,6 +30,8 @@ figma.ui.onmessage = msg => {
 
 		//apply theme to selection
 		case 'applyTheme':
+			lastThemeData = msg.themeData
+			lastTheme = msg.theme
 			applyTheme(msg.themeData, msg.theme);
 		break;
 
