@@ -85,7 +85,6 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
-//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let reformatedArray = [];
@@ -119,7 +118,6 @@ function assembleStylesArray(styles) {
     console.log('num of output styles', reformatedArray.length);
     return filteredArray;
 }
-//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -164,19 +162,14 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
-//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
-//# sourceMappingURL=hasChildren.js.map
 
 const hasFillStyles = (node) => Boolean(node['fillStyleId']);
-//# sourceMappingURL=hasFillStyles.js.map
 
 const hasEffects = (node) => Boolean(node['effectStyleId']);
-//# sourceMappingURL=hasEffects.js.map
 
 const hasStrokeStyle = (node) => Boolean(node['strokeStyleId']);
-//# sourceMappingURL=hasStrokeStyle.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -300,7 +293,6 @@ function getStylesFromNode(node, styleTypes) {
         }
     }
 }
-//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -320,7 +312,6 @@ function getStyleData(styleTypes, styleSource) {
         getStylesFromNodes(nodes, styleTypes);
     }
 }
-//# sourceMappingURL=getStyleData.js.map
 
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -338,7 +329,6 @@ function resetThemer() {
         'type': 'reset'
     });
 }
-//# sourceMappingURL=resetThemer.js.map
 
 function saveCredentials(apiKey, apiURL) {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -353,7 +343,6 @@ function saveCredentials(apiKey, apiURL) {
     }))();
     figma.notify('JSONBin setup successful. You can start creating themes now.');
 }
-//# sourceMappingURL=saveCredentials.js.map
 
 //variables we will use to apply the right type of styles
 let colorStyles = false;
@@ -371,11 +360,11 @@ const styles$1 = {};
 let notify;
 //failed styles
 let failedStyles = {};
-function applyTheme(themeData, theme) {
+function applyTheme(themeData, theme, targetSelection) {
     return __awaiter(this, void 0, void 0, function* () {
         failedStyles = {};
         //tell the user the theme is being applied
-        notify = figma.notify('Applying ' + theme + ' theme...', { timeout: Infinity });
+        notify = figma.notify('Applying ' + theme + ' theme...', { timeout: 3000 });
         //this is the theme the user selected to apply
         //normalizing in lowercase for comparison reasons
         selectedTheme = theme.toLowerCase();
@@ -385,7 +374,7 @@ function applyTheme(themeData, theme) {
         //filter all of the theme data down to just the styles associated with the selected theme
         selectedThemeStyles = themeData.filter(style => style.theme.toLowerCase() === selectedTheme);
         //get for selection
-        let selection = figma.currentPage.selection;
+        let selection = targetSelection ? figma.currentPage.selection : figma.currentPage.children;
         //check for selection
         //TODO: turn into guard 
         if (selection.length >= 1) {
@@ -419,20 +408,15 @@ function applyTheme(themeData, theme) {
             }
             //Msg to user
             if (actualCount > 0) {
-                if (numOfFailedStyles === 0) {
-                    figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
-                }
+                if (numOfFailedStyles === 0) ;
                 else {
                     figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers. ' + failedMsg, { timeout: 5000 });
                 }
             }
-            else {
-                figma.notify('No styles from your themes were found.');
-            }
             count = {};
         }
         else {
-            figma.notify('Please make a selection');
+            notify.cancel();
         }
     });
 }
@@ -651,21 +635,21 @@ function findMatchedKeyOrImportStyle(matchedStyle) {
         return result;
     });
 }
-//# sourceMappingURL=applyTheme.js.map
 
 //api credentials
 var apiSecret;
 var apiURL;
 var lastThemeData;
 var lastTheme;
+var lastTargetWasSelection;
 figma.on('selectionchange', () => {
-    if (lastThemeData && lastTheme) {
-        applyTheme(lastThemeData, lastTheme);
+    if (lastThemeData && lastTheme && lastTargetWasSelection) {
+        applyTheme(lastThemeData, lastTheme, lastTargetWasSelection);
     }
 });
 figma.on('documentchange', () => {
     if (lastThemeData && lastTheme) {
-        applyTheme(lastThemeData, lastTheme);
+        applyTheme(lastThemeData, lastTheme, lastTargetWasSelection);
     }
 });
 //recieves msgs from the UI
@@ -675,7 +659,8 @@ figma.ui.onmessage = msg => {
         case 'applyTheme':
             lastThemeData = msg.themeData;
             lastTheme = msg.theme;
-            applyTheme(msg.themeData, msg.theme);
+            lastTargetWasSelection = msg.targetSelection;
+            applyTheme(msg.themeData, msg.theme, msg.targetSelection);
             break;
         //when the UI needs Figma to gather data to create a new theme, this function is executed
         case 'createTheme':
@@ -744,4 +729,3 @@ figma.showUI(__html__, { themeColors: true, width: 240, height: 312 });
         });
     }
 }))();
-//# sourceMappingURL=code.js.map

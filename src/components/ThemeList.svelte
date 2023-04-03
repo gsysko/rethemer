@@ -11,6 +11,13 @@
     let width = $winWidth + 'px';
     //export { className as class };
 
+    let targetMenuItemArray = [
+        { 'value': 'targetSelection', 'label': 'Apply to selection', 'group': null, 'selected': true },
+        { 'value': 'targetPage', 'label': 'Apply to page', 'group': null, 'selected': false }
+    ];
+
+    let selectedTargetItem;
+
     let themes = [];
 
     //reactive function that will run every time there is a change to theme data
@@ -56,14 +63,17 @@
 	}
 
     let themeIsSelected = false;
-    $: $selectedTheme, $selectedTheme ? themeIsSelected=false : themeIsSelected=true;
+    $: {
+        $selectedTheme, $selectedTheme ? themeIsSelected=false : themeIsSelected=true ;
+        applyTheme();
+    }
 
     //apply theme
     function applyTheme() {
-
-        //send a message to the UI to apply
-        parent.postMessage({ pluginMessage: { 'type': 'applyTheme', 'themeData': $themeData, 'theme': $selectedTheme } }, '*');
-
+        if($selectedTheme) {
+            //send a message to the UI to apply
+            parent.postMessage({ pluginMessage: { 'type': 'applyTheme', 'themeData': $themeData, 'theme': $selectedTheme, 'targetSelection': selectedTargetItem.value == 'targetSelection' } }, '*');
+        }
     }
 
     //lint selection
@@ -82,8 +92,8 @@
                 <DragList bind:itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
             </div>
 
-            <div class="footer flex row flex-no-shrink justify-content-end align-items-center pr-xsmall pl-xsmall">
-                <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="flex-grow align-item justify-content-center">Apply to selection</Button>
+            <div class="footer pl-xsmall pr-xsmall pt-xxsmall pb-xxsmall">
+                <SelectMenu bind:menuItems={targetMenuItemArray} bind:value={selectedTargetItem} on:change={applyTheme}/>
             </div>
 
     {:else}

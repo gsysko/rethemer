@@ -10,16 +10,17 @@ var apiURL:string;
 
 var lastThemeData
 var lastTheme
+var lastTargetWasSelection
 
 figma.on('selectionchange', () => {
-	if(lastThemeData && lastTheme) {
-		applyTheme(lastThemeData, lastTheme);
+	if(lastThemeData && lastTheme && lastTargetWasSelection) {
+		applyTheme(lastThemeData, lastTheme, lastTargetWasSelection);
 	}
 })
 
 figma.on('documentchange', () => {
 	if(lastThemeData && lastTheme) {
-		applyTheme(lastThemeData, lastTheme);
+		applyTheme(lastThemeData, lastTheme, lastTargetWasSelection);
 	}
 })
 
@@ -32,7 +33,8 @@ figma.ui.onmessage = msg => {
 		case 'applyTheme':
 			lastThemeData = msg.themeData
 			lastTheme = msg.theme
-			applyTheme(msg.themeData, msg.theme);
+			lastTargetWasSelection = msg.targetSelection
+			applyTheme(msg.themeData, msg.theme, msg.targetSelection);
 		break;
 
 		//when the UI needs Figma to gather data to create a new theme, this function is executed

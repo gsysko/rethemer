@@ -26,12 +26,12 @@ let notify;
 //failed styles
 let failedStyles = {};
 
-export async function applyTheme(themeData, theme) {
+export async function applyTheme(themeData, theme, targetSelection) {
 
     failedStyles = {};
 
     //tell the user the theme is being applied
-    notify = figma.notify('Applying ' + theme + ' theme...', {timeout: Infinity})
+    notify = figma.notify('Applying ' + theme + ' theme...', {timeout: 3000})
 
     //this is the theme the user selected to apply
     //normalizing in lowercase for comparison reasons
@@ -46,7 +46,7 @@ export async function applyTheme(themeData, theme) {
     selectedThemeStyles = themeData.filter(style => style.theme.toLowerCase() === selectedTheme);
 
     //get for selection
-    let selection = figma.currentPage.selection;
+    let selection = targetSelection ? figma.currentPage.selection : figma.currentPage.children;
 
     //check for selection
     //TODO: turn into guard 
@@ -83,18 +83,16 @@ export async function applyTheme(themeData, theme) {
         //Msg to user
         if (actualCount > 0) {
             if (numOfFailedStyles === 0) {
-                figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
+                // Success. Do nothing.
             } else {
                 figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers. ' + failedMsg, {timeout: 5000});
             }
-        } else {
-            figma.notify('No styles from your themes were found.');
         }
 
         count = {};
 
     } else {
-        figma.notify('Please make a selection');
+        notify.cancel();
     }
 }
 
